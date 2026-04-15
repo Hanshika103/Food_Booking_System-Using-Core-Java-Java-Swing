@@ -1,0 +1,19 @@
+Main
+ ↓
+LoginFrame
+ ↓
+LoginDAO (DB check)
+ ↓
+MenuFrame (if login success)
+ ↓
+User chooses option:
+
+   ├── BookingFrame → BookingDAO → Order DB
+   ├── OrdersFrame → BookingDAO → Orders fetch
+   ├── PaymentFrame → BookingDAO → Payment update
+   ├── AdminLoginFrame → AdminDAO → Admin validation
+   │        ↓
+   │    AdminOrdersFrame
+   │        ↓
+   │    AdminMenuFrame
+   └── Logout → LoginFrame
