@@ -1,40 +1,58 @@
+package dao; 
+// DAO package → contains database logic classes (Data Access Layer)
 
+import java.sql.*; 
+// Import JDBC classes (Connection, PreparedStatement, ResultSet, SQLException)
 
+import database.DBConnection; 
+// Import custom DB connection class (gives Connection object)
 
-package dao;
+import model.Registration; 
+// Import Registration model (used to return user data)
 
-import java.sql.*;
-import database.DBConnection;
-import model.Registration;
-
+// This class handles login validation from database
 public class LoginDAO {
 
-    
+    // ==============================
+    // METHOD: Validate User Login
+    // ==============================
     public Registration validate(Registration user) {
 
-    String sql = "SELECT * FROM student WHERE email=? AND password=?";
+        // SQL query to check if email & password exist in student table
+        String sql = "SELECT * FROM student WHERE email=? AND password=?";
 
-    try (Connection con = DBConnection.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
+        // try-with-resources → auto closes Connection & PreparedStatement
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        ps.setString(1, user.getEmail());
-        ps.setString(2, user.getPassword());
+            // Set first ? = email from user object
+            ps.setString(1, user.getEmail());
 
-        ResultSet rs = ps.executeQuery();
+            // Set second ? = password from user object
+            ps.setString(2, user.getPassword());
 
-        if (rs.next()) {
-            return new Registration(
-                    rs.getInt("student_id"),
-                    rs.getString("name"),
-                    rs.getString("email"),
-                    rs.getString("password")
-            );
+            // Execute query and get result
+            ResultSet rs = ps.executeQuery();
+
+            // Check if any record exists
+            if (rs.next()) {
+
+                // If user found → return full user data from DB
+                return new Registration(
+
+                        rs.getInt("student_id"), // get ID from DB
+                        rs.getString("name"),    // get name from DB
+                        rs.getString("email"),   // get email from DB
+                        rs.getString("password") // get password from DB
+                );
+            }
+
+        } catch (SQLException e) {
+            // Print error if SQL exception occurs
+            e.printStackTrace();
         }
 
-    } catch (SQLException e) {
-        e.printStackTrace();
+        // If user not found → return null
+        return null;
     }
-
-    return null;
-}
 }
