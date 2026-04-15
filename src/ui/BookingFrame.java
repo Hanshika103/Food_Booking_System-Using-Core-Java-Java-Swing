@@ -1,297 +1,165 @@
+package ui; // Package name (folder where this class belongs)
 
+import javax.swing.*; // Swing UI components
+import java.awt.*; // Layouts, colors, fonts
+import java.util.ArrayList; // Dynamic list
+import java.util.List; // List interface
 
-/*package ui;
+import dao.BookingDAO; // Handles database operations for orders
+import dao.MenuDAO; // Fetches menu items from database
+import model.Order; // Order model class
+import model.MenuItem; // Menu item model class
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import dao.BookingDAO;
-import dao.MenuDAO;
-import model.Order;
-import model.MenuItem;
-
+// Frame where student/user selects food and places order
 public class BookingFrame extends JFrame {
 
-    private List<JCheckBox> foodCheckboxes;
-    private List<JSpinner> quantitySpinners;
-    private JButton placeOrderButton, backButton;
+    private List<JCheckBox> foodCheckboxes; // Checkbox list for menu items
+    private List<JSpinner> quantitySpinners; // Quantity selectors
+    private JButton placeOrderButton, backButton; // Action buttons
 
-    private String userEmail;
+    private int studentId; // Logged-in student ID
+    private String userName; // Logged-in username
 
-    private List<MenuItem> menuItems; // menu from DB
+    private List<MenuItem> menuItems; // Menu items from database
 
-    public BookingFrame(String email) {
-        this.userEmail = email;
-        initUI();
-    }
-
-    private void initUI() {
-
-        setTitle("Book Food");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setSize(500, 400);
-        setResizable(true);
-
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(new Color(245,245,245));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10,10,10,10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        JLabel title = new JLabel("Select Food Items");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        title.setHorizontalAlignment(JLabel.CENTER);
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        panel.add(title, gbc);
-
-        foodCheckboxes = new ArrayList<>();
-        quantitySpinners = new ArrayList<>();
-
-        // Load menu from DB
-        MenuDAO menuDAO = new MenuDAO();
-        menuItems = menuDAO.getAllItems();
-
-        int row = 1;
-
-        for (MenuItem item : menuItems) {
-
-            JCheckBox cb = new JCheckBox(item.getItemName() + " (₹" + item.getPrice() + ")");
-            cb.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            foodCheckboxes.add(cb);
-
-            gbc.gridx = 0;
-            gbc.gridy = row;
-            panel.add(cb, gbc);
-
-            JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,1,10,1));
-            quantitySpinners.add(spinner);
-
-            gbc.gridx = 1;
-            panel.add(spinner, gbc);
-
-            row++;
-        }
-
-        placeOrderButton = new JButton("Place Order");
-        placeOrderButton.setBackground(new Color(33,150,243));
-        placeOrderButton.setForeground(Color.WHITE);
-        placeOrderButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
-
-        gbc.gridx = 0;
-        gbc.gridy = row;
-        gbc.gridwidth = 2;
-        panel.add(placeOrderButton, gbc);
-
-        row++;
-
-        backButton = new JButton("Back to Menu");
-        backButton.setBackground(new Color(244,67,54));
-        backButton.setForeground(Color.WHITE);
-        backButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
-
-        gbc.gridy = row;
-        panel.add(backButton, gbc);
-
-        add(panel);
-
-        placeOrderButton.addActionListener(e -> placeOrder());
-        backButton.addActionListener(e -> goBack());
-
-        setVisible(true);
-    }
-
-    private void placeOrder() {
-
-        List<String> selectedItems = new ArrayList<>();
-        int totalPrice = 0;
-
-        for (int i = 0; i < foodCheckboxes.size(); i++) {
-
-            JCheckBox cb = foodCheckboxes.get(i);
-
-            if (cb.isSelected()) {
-
-                int qty = (Integer) quantitySpinners.get(i).getValue();
-                MenuItem item = menuItems.get(i);
-
-                int price = (int) item.getPrice() * qty;
-
-                totalPrice += price;
-
-                selectedItems.add(item.getItemName() + " x" + qty + " (₹" + price + ")");
-            }
-        }
-
-        if (selectedItems.isEmpty()) {
-
-            JOptionPane.showMessageDialog(this, "Please select at least one item.");
-            return;
-        }
-
-       Order order = new Order(
-        userEmail,
-        String.join(", ", selectedItems),
-        totalPrice,
-        new java.util.Date(),
-        false
-);
-
-        BookingDAO dao = new BookingDAO();
-
-        if (dao.placeOrder(order)) {
-
-            JOptionPane.showMessageDialog(this,
-                    "Order placed successfully!\nTotal: ₹" + totalPrice);
-
-        } else {
-
-            JOptionPane.showMessageDialog(this,
-                    "Failed to place order.");
-        }
-    }
-
-    private void goBack() {
-
-        dispose();
-        new MenuFrame(userEmail);
-    }
-}
-   */ 
-
-
-  package ui;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import dao.BookingDAO;
-import dao.MenuDAO;
-import model.Order;
-import model.MenuItem;
-
-public class BookingFrame extends JFrame {
-
-    private List<JCheckBox> foodCheckboxes;
-    private List<JSpinner> quantitySpinners;
-    private JButton placeOrderButton, backButton;
-
-    private int studentId;
-    private String userName; // ✅ added
-
-    private List<MenuItem> menuItems;
-
-    // ✅ FINAL CONSTRUCTOR
+    // Constructor (receives user info from previous screen)
     public BookingFrame(int studentId, String userName) {
-        this.studentId = studentId;
-        this.userName = userName;
-        initUI();
+        this.studentId = studentId; // store student ID
+        this.userName = userName; // store username
+        initUI(); // build UI
     }
 
+    // ==============================
+    // CREATE UI
+    // ==============================
     private void initUI() {
 
-        setTitle("Book Food");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setSize(500, 400);
+        setTitle("Book Food"); // Window title
 
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Exit program on close
+
+        setLocationRelativeTo(null); // Center window
+
+        setSize(500, 400); // Window size
+
+        // Main panel with GridBagLayout
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(new Color(245,245,245));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10,10,10,10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.setBackground(new Color(245,245,245)); // Light gray background
 
+        GridBagConstraints gbc = new GridBagConstraints(); // Layout rules
+
+        gbc.insets = new Insets(10,10,10,10); // spacing between components
+
+        gbc.fill = GridBagConstraints.HORIZONTAL; // stretch horizontally
+
+        // Title label
         JLabel title = new JLabel("Select Food Items");
+
         title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+
         title.setHorizontalAlignment(JLabel.CENTER);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        panel.add(title, gbc);
 
-        foodCheckboxes = new ArrayList<>();
-        quantitySpinners = new ArrayList<>();
+        panel.add(title, gbc); // add title to panel
 
-        // Load menu from DB
+        foodCheckboxes = new ArrayList<>(); // initialize checkbox list
+        quantitySpinners = new ArrayList<>(); // initialize spinner list
+
+        // Load menu items from database
         MenuDAO menuDAO = new MenuDAO();
         menuItems = menuDAO.getAllItems();
 
-        int row = 1;
+        int row = 1; // start from row 1
 
+        // Loop through menu items
         for (MenuItem item : menuItems) {
 
+            // Create checkbox for item
             JCheckBox cb = new JCheckBox(item.getItemName() + " (₹" + item.getPrice() + ")");
-            foodCheckboxes.add(cb);
+            foodCheckboxes.add(cb); // store checkbox
 
             gbc.gridx = 0;
             gbc.gridy = row;
-            panel.add(cb, gbc);
+            panel.add(cb, gbc); // add checkbox
 
+            // Quantity selector (1 to 10)
             JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,1,10,1));
             quantitySpinners.add(spinner);
 
             gbc.gridx = 1;
-            panel.add(spinner, gbc);
+            panel.add(spinner, gbc); // add spinner
 
-            row++;
+            row++; // move to next row
         }
 
+        // ==============================
+        // PLACE ORDER BUTTON
+        // ==============================
         placeOrderButton = new JButton("Place Order");
+
         placeOrderButton.setBackground(new Color(33,150,243));
+
         placeOrderButton.setForeground(Color.WHITE);
 
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.gridwidth = 2;
+
         panel.add(placeOrderButton, gbc);
 
         row++;
 
+        // ==============================
+        // BACK BUTTON
+        // ==============================
         backButton = new JButton("Back to Menu");
+
         backButton.setBackground(new Color(244,67,54));
+
         backButton.setForeground(Color.WHITE);
 
         gbc.gridy = row;
+
         panel.add(backButton, gbc);
 
-        add(panel);
+        add(panel); // add panel to frame
 
+        // Button actions
         placeOrderButton.addActionListener(e -> placeOrder());
         backButton.addActionListener(e -> goBack());
 
-        setVisible(true);
+        setVisible(true); // show window
     }
 
     // ==============================
-    // 🔥 FINAL PLACE ORDER METHOD
+    // PLACE ORDER LOGIC
     // ==============================
     private void placeOrder() {
 
-        List<Order.Item> itemsList = new ArrayList<>();
-        double totalAmount = 0;
+        List<Order.Item> itemsList = new ArrayList<>(); // selected items
+        double totalAmount = 0; // total bill
 
+        // Loop through all menu items
         for (int i = 0; i < foodCheckboxes.size(); i++) {
 
             JCheckBox cb = foodCheckboxes.get(i);
 
+            // If item is selected
             if (cb.isSelected()) {
 
-                int qty = (Integer) quantitySpinners.get(i).getValue();
-                MenuItem item = menuItems.get(i);
+                int qty = (Integer) quantitySpinners.get(i).getValue(); // quantity
 
-                double subtotal = item.getPrice() * qty;
-                totalAmount += subtotal;
+                MenuItem item = menuItems.get(i); // actual item
 
+                double subtotal = item.getPrice() * qty; // item total
+
+                totalAmount += subtotal; // add to total
+
+                // Add item to order list
                 itemsList.add(new Order.Item(
                         item.getItemId(),
                         qty,
@@ -300,11 +168,13 @@ public class BookingFrame extends JFrame {
             }
         }
 
+        // If nothing selected
         if (itemsList.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please select at least one item.");
             return;
         }
 
+        // Create Order object
         Order order = new Order(
                 studentId,
                 new java.util.Date(),
@@ -313,14 +183,15 @@ public class BookingFrame extends JFrame {
                 itemsList
         );
 
-        BookingDAO dao = new BookingDAO();
+        BookingDAO dao = new BookingDAO(); // DAO object
 
+        // Save order to database
         if (dao.placeOrder(order)) {
 
             JOptionPane.showMessageDialog(this,
                     "Order placed successfully!\nTotal: ₹" + totalAmount);
 
-            // ✅ OPTIONAL: clear selection after order
+            // Clear selections after success
             for (JCheckBox cb : foodCheckboxes) {
                 cb.setSelected(false);
             }
@@ -333,10 +204,12 @@ public class BookingFrame extends JFrame {
     }
 
     // ==============================
-    // 🔥 FINAL BACK METHOD
+    // GO BACK TO MENU
     // ==============================
     private void goBack() {
-        dispose();
-        new MenuFrame(studentId, userName); // ✅ FIXED
+
+        dispose(); // close current window
+
+        new MenuFrame(studentId, userName); // open menu screen
     }
 }
