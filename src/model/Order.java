@@ -1,186 +1,119 @@
+package model; // Model package (stores data classes)
 
+import java.util.Date; // For order date/time
+import java.util.List; // For storing multiple items in order
 
-
-/*package model;
-
-import java.util.Date;
-
+// This class represents an Order in the system
 public class Order {
-
-    private int orderId;
-    private String userEmail;
-    private String items;
-    private int totalPrice;
-    private Date orderDate;
-    private boolean paid;
-    private String status;
-
-    // Constructor for placing new order
-    public Order(String userEmail, String items, int totalPrice, Date orderDate, boolean paid) {
-        this.userEmail = userEmail;
-        this.items = items;
-        this.totalPrice = totalPrice;
-        this.orderDate = orderDate;
-        this.paid = paid;
-        this.status = "Preparing";
-    }
-
-    // Constructor for fetching order from database
-    public Order(int orderId, String userEmail, String items, int totalPrice, Date orderDate, boolean paid, String status) {
-        this.orderId = orderId;
-        this.userEmail = userEmail;
-        this.items = items;
-        this.totalPrice = totalPrice;
-        this.orderDate = orderDate;
-        this.paid = paid;
-        this.status = status;
-    }
-
-    // Getters
-
-    public int getOrderId() {
-        return orderId;
-    }
-
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public String getItems() {
-        return items;
-    }
-
-    public int getTotalPrice() {
-        return totalPrice;
-    }
-
-    public Date getOrderDate() {
-        return orderDate;
-    }
-
-    public boolean isPaid() {
-        return paid;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    // Setters
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setPaid(boolean paid) {
-        this.paid = paid;
-    }
-}*/
-
-package model;
-
-import java.util.Date;
-import java.util.List;
-
-public class Order {
-
-    private int orderId;
-    private int studentId;
-    private Date orderDate;
-    private double totalAmount;
-    private String status;
-
-    private List<Item> itemsList; // 🔥 important
 
     // ==============================
-    // Constructor for placing order
+    // FIELDS (ORDER DATA)
+    // ==============================
+
+    private int orderId; // unique order ID (from database)
+    private int studentId; // which student placed order
+    private Date orderDate; // date of order
+    private double totalAmount; // total bill amount
+    private String status; // order status (Preparing, Ready, Delivered)
+
+    private List<Item> itemsList; // list of items in this order (VERY IMPORTANT)
+
+    // ==============================
+    // CONSTRUCTOR 1 (FOR PLACING ORDER)
     // ==============================
     public Order(int studentId, Date orderDate, double totalAmount, String status, List<Item> itemsList) {
-        this.studentId = studentId;
-        this.orderDate = orderDate;
-        this.totalAmount = totalAmount;
-        this.status = status;
-        this.itemsList = itemsList;
+
+        this.studentId = studentId; // assign student ID
+        this.orderDate = orderDate; // assign order date
+        this.totalAmount = totalAmount; // assign total bill
+        this.status = status; // assign status
+        this.itemsList = itemsList; // assign list of items
     }
 
     // ==============================
-    // Constructor for fetching order
+    // CONSTRUCTOR 2 (FOR FETCHING FROM DATABASE)
     // ==============================
     public Order(int orderId, int studentId, Date orderDate, Date orderTime, double totalAmount, String status) {
-        this.orderId = orderId;
-        this.studentId = studentId;
-        this.orderDate = orderDate;
-        this.totalAmount = totalAmount;
-        this.status = status;
+
+        this.orderId = orderId; // assign order ID
+        this.studentId = studentId; // assign student ID
+        this.orderDate = orderDate; // assign order date
+        this.totalAmount = totalAmount; // assign total amount
+        this.status = status; // assign status
+
+        // NOTE: orderTime parameter is NOT used (can be removed)
     }
 
     // ==============================
-    // Getters
+    // GETTERS (READ DATA)
     // ==============================
 
     public int getOrderId() {
-        return orderId;
+        return orderId; // return order ID
     }
 
     public int getStudentId() {
-        return studentId;
+        return studentId; // return student ID
     }
 
     public Date getOrderDate() {
-        return orderDate;
+        return orderDate; // return order date
     }
 
     public double getTotalAmount() {
-        return totalAmount;
+        return totalAmount; // return total bill
     }
 
     public String getStatus() {
-        return status;
+        return status; // return order status
     }
 
     public List<Item> getItemsList() {
-        return itemsList;
+        return itemsList; // return list of items in order
     }
 
     // ==============================
-    // Setters
+    // SETTERS (UPDATE DATA)
     // ==============================
 
     public void setStatus(String status) {
-        this.status = status;
+        this.status = status; // update status
     }
 
     public void setItemsList(List<Item> itemsList) {
-        this.itemsList = itemsList;
+        this.itemsList = itemsList; // update items list
     }
 
     // ==============================
-    // INNER CLASS (VERY IMPORTANT 🔥)
+    // INNER CLASS (ORDER ITEMS)
     // ==============================
     public static class Item {
 
-        private int itemId;
-        private int quantity;
-        private double subtotal;
+        private int itemId; // food item ID
+        private int quantity; // quantity ordered
+        private double subtotal; // price × quantity
 
+        // Constructor for item
         public Item(int itemId, int quantity, double subtotal) {
-            this.itemId = itemId;
-            this.quantity = quantity;
-            this.subtotal = subtotal;
+
+            this.itemId = itemId; // assign item ID
+            this.quantity = quantity; // assign quantity
+            this.subtotal = subtotal; // assign subtotal
         }
 
+        // Getter for item ID
         public int getItemId() {
-            return itemId;
+            return itemId; // return item ID
         }
 
+        // Getter for quantity
         public int getQuantity() {
-            return quantity;
+            return quantity; // return quantity
         }
 
+        // Getter for subtotal
         public double getSubtotal() {
-            return subtotal;
+            return subtotal; // return subtotal
         }
-       
     }
-    
 }
