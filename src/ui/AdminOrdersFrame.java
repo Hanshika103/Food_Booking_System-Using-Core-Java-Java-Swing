@@ -1,227 +1,51 @@
-/*package ui;
+package ui; // Package name (folder where this class is stored)
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.util.List;
+import javax.swing.*; // Swing components (JFrame, JTable, JButton, etc.)
+import javax.swing.table.DefaultTableCellRenderer; // For custom table row styling
+import javax.swing.table.DefaultTableModel; // For managing table data
+import java.awt.*; // Layouts, colors, fonts
+import java.util.List; // List collection
 
-import dao.BookingDAO;
-import model.Order;
+import dao.BookingDAO; // DAO class for database order operations
+import model.Order; // Model class representing an order
 
+// Admin dashboard frame to display and manage all orders
 public class AdminOrdersFrame extends JFrame {
 
-    private JTable ordersTable;
-    private JButton logoutButton;
+    private JTable ordersTable; // Table to display orders
+    private JButton logoutButton; // Logout button
 
+    // Constructor
     public AdminOrdersFrame() {
-        initUI();
+        initUI(); // Build UI
     }
 
+    // Method to build UI
     private void initUI() {
 
-        setTitle("Admin - All Orders");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setSize(750, 450);
-        setResizable(true);
+        setTitle("Admin - All Orders"); // Window title
 
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Close app on exit
+
+        setLocationRelativeTo(null); // Center window
+
+        setSize(750, 450); // Window size
+
+        // Main panel using BorderLayout
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBackground(new Color(245, 245, 245));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Title
+        panel.setBackground(new Color(245, 245, 245)); // Light background color
+
+        // Title label
         JLabel title = new JLabel("All Orders", JLabel.CENTER);
-        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        title.setForeground(new Color(156, 39, 176));
-        panel.add(title, BorderLayout.NORTH);
 
-        // Table
-        String[] columns = {
-                "Order ID",
-                "User Email",
-                "Items & Quantity",
-                "Total Price",
-                "Paid",
-                "Status",
-                "Order Date"
-        };
+        title.setFont(new Font("Segoe UI", Font.BOLD, 22)); // Set font style
 
-        DefaultTableModel model = new DefaultTableModel(columns, 0);
-        ordersTable = new JTable(model);
+        panel.add(title, BorderLayout.NORTH); // Add title at top
 
-        ordersTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        ordersTable.setRowHeight(25);
-
-        ordersTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
-        ordersTable.getTableHeader().setBackground(new Color(33, 150, 243));
-        ordersTable.getTableHeader().setForeground(Color.WHITE);
-
-        // Alternate row colors
-        ordersTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            public Component getTableCellRendererComponent(
-                    JTable table, Object value, boolean isSelected,
-                    boolean hasFocus, int row, int column) {
-
-                Component c = super.getTableCellRendererComponent(
-                        table, value, isSelected, hasFocus, row, column);
-
-                if (!isSelected) {
-                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(230, 230, 250));
-                }
-
-                return c;
-            }
-        });
-
-        JScrollPane scrollPane = new JScrollPane(ordersTable);
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        loadOrders(model);
-
-        // Buttons
-        JButton menuButton = new JButton("Manage Menu");
-        JButton statusButton = new JButton("Update Status");
-        logoutButton = new JButton("Logout");
-
-        menuButton.setBackground(new Color(76, 175, 80));
-        statusButton.setBackground(new Color(33, 150, 243));
-        logoutButton.setBackground(new Color(244, 67, 54));
-
-        menuButton.setForeground(Color.WHITE);
-        statusButton.setForeground(Color.WHITE);
-        logoutButton.setForeground(Color.WHITE);
-
-        menuButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        statusButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        logoutButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-
-        menuButton.setFocusPainted(false);
-        statusButton.setFocusPainted(false);
-        logoutButton.setFocusPainted(false);
-
-        // Button Actions
-        menuButton.addActionListener(e -> new AdminMenuFrame());
-
-        statusButton.addActionListener(e -> updateStatus());
-
-        logoutButton.addActionListener(e -> {
-            dispose();
-            new AdminLoginFrame();
-        });
-
-        JPanel southPanel = new JPanel();
-        southPanel.setBackground(new Color(245, 245, 245));
-
-        southPanel.add(menuButton);
-        southPanel.add(statusButton);
-        southPanel.add(logoutButton);
-
-        panel.add(southPanel, BorderLayout.SOUTH);
-
-        add(panel);
-        setVisible(true);
-    }
-
-    // Load Orders
-    private void loadOrders(DefaultTableModel model) {
-
-        BookingDAO dao = new BookingDAO();
-        List<Order> orders = dao.getAllOrders();
-
-        for (Order order : orders) {
-
-            model.addRow(new Object[]{
-                    order.getOrderId(),
-                    order.getUserEmail(),
-                    order.getItems(),
-                    order.getTotalPrice(),
-                    order.isPaid() ? "Yes" : "No",
-                    order.getStatus(),
-                    order.getOrderDate()
-            });
-        }
-    }
-
-    // Update Order Status
-    private void updateStatus() {
-
-        int row = ordersTable.getSelectedRow();
-
-        if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Select an order first");
-            return;
-        }
-
-        int orderId = (int) ordersTable.getValueAt(row, 0);
-
-        String[] options = {"Preparing", "Ready", "Delivered"};
-
-        String status = (String) JOptionPane.showInputDialog(
-                this,
-                "Select Status",
-                "Update Order Status",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                options[0]
-        );
-
-        if (status != null) {
-
-            BookingDAO dao = new BookingDAO();
-
-            if (dao.updateOrderStatus(orderId, status)) {
-
-                JOptionPane.showMessageDialog(this, "Status Updated");
-
-                dispose();
-                new AdminOrdersFrame();
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(AdminOrdersFrame::new);
-    }
-}*/
-
-
-package ui;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.util.List;
-
-import dao.BookingDAO;
-import model.Order;
-
-public class AdminOrdersFrame extends JFrame {
-
-    private JTable ordersTable;
-    private JButton logoutButton;
-
-    public AdminOrdersFrame() {
-        initUI();
-    }
-
-    private void initUI() {
-
-        setTitle("Admin - All Orders");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setSize(750, 450);
-
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBackground(new Color(245, 245, 245));
-
-        JLabel title = new JLabel("All Orders", JLabel.CENTER);
-        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        panel.add(title, BorderLayout.NORTH);
-
-        // ✅ FIXED COLUMNS
+        // ==========================
+        // TABLE COLUMNS
+        // ==========================
         String[] columns = {
                 "Order ID",
                 "Student ID",
@@ -230,13 +54,19 @@ public class AdminOrdersFrame extends JFrame {
                 "Order Date"
         };
 
+        // Table model (data container)
         DefaultTableModel model = new DefaultTableModel(columns, 0);
+
+        // JTable using model
         ordersTable = new JTable(model);
 
-        ordersTable.setRowHeight(25);
+        ordersTable.setRowHeight(25); // Row height
 
-        // Alternate row colors
+        // ==========================
+        // ROW COLOR STYLING
+        // ==========================
         ordersTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+
             public Component getTableCellRendererComponent(
                     JTable table, Object value, boolean isSelected,
                     boolean hasFocus, int row, int column) {
@@ -244,6 +74,7 @@ public class AdminOrdersFrame extends JFrame {
                 Component c = super.getTableCellRendererComponent(
                         table, value, isSelected, hasFocus, row, column);
 
+                // Alternate row colors (zebra effect)
                 if (!isSelected) {
                     c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(230, 230, 250));
                 }
@@ -252,71 +83,83 @@ public class AdminOrdersFrame extends JFrame {
             }
         });
 
+        // Add table inside scroll pane
         panel.add(new JScrollPane(ordersTable), BorderLayout.CENTER);
 
+        // Load data from database into table
         loadOrders(model);
 
-        // Buttons
-        JButton menuButton = new JButton("Manage Menu");
-        JButton statusButton = new JButton("Update Status");
-        logoutButton = new JButton("Logout");
+        // ==========================
+        // BUTTONS
+        // ==========================
+        JButton menuButton = new JButton("Manage Menu"); // Open menu frame
+        JButton statusButton = new JButton("Update Status"); // Change order status
+        logoutButton = new JButton("Logout"); // Logout button
 
+        // Button actions
         menuButton.addActionListener(e -> new AdminMenuFrame());
-
         statusButton.addActionListener(e -> updateStatus());
 
         logoutButton.addActionListener(e -> {
-            dispose();
-            new AdminLoginFrame();
+            dispose(); // Close current frame
+            new AdminLoginFrame(); // Go back to login screen
         });
 
+        // Bottom panel for buttons
         JPanel southPanel = new JPanel();
+
         southPanel.add(menuButton);
         southPanel.add(statusButton);
         southPanel.add(logoutButton);
 
-        panel.add(southPanel, BorderLayout.SOUTH);
+        panel.add(southPanel, BorderLayout.SOUTH); // Add buttons at bottom
 
-        add(panel);
-        setVisible(true);
+        add(panel); // Add main panel to frame
+
+        setVisible(true); // Show window
     }
 
     // ==============================
-    // 🔥 FIXED LOAD METHOD
+    // LOAD ORDERS FROM DATABASE
     // ==============================
     private void loadOrders(DefaultTableModel model) {
 
-        BookingDAO dao = new BookingDAO();
-        List<Order> orders = dao.getAllOrders();
+        BookingDAO dao = new BookingDAO(); // DAO object
 
+        List<Order> orders = dao.getAllOrders(); // Fetch all orders
+
+        // Loop through each order and add to table
         for (Order order : orders) {
 
             model.addRow(new Object[]{
-                    order.getOrderId(),
-                    order.getStudentId(),      // ✅ FIXED
-                    order.getTotalAmount(),    // ✅ FIXED
-                    order.getStatus(),
-                    order.getOrderDate()
+                    order.getOrderId(),     // Order ID
+                    order.getStudentId(),   // Student ID
+                    order.getTotalAmount(), // Total amount
+                    order.getStatus(),      // Order status
+                    order.getOrderDate()    // Date
             });
         }
     }
 
     // ==============================
-    // UPDATE STATUS
+    // UPDATE ORDER STATUS
     // ==============================
     private void updateStatus() {
 
-        int row = ordersTable.getSelectedRow();
+        int row = ordersTable.getSelectedRow(); // Get selected row
 
-        if (row == -1) {
+        if (row == -1) { // If no row selected
             JOptionPane.showMessageDialog(this, "Select an order first");
             return;
         }
 
+        // Get order ID from table
         int orderId = (int) ordersTable.getValueAt(row, 0);
 
+        // Status options
         String[] options = {"Preparing", "Ready", "Delivered"};
 
+        // Show dropdown dialog
         String status = (String) JOptionPane.showInputDialog(
                 this,
                 "Select Status",
@@ -327,21 +170,26 @@ public class AdminOrdersFrame extends JFrame {
                 options[0]
         );
 
+        // If user selected a status
         if (status != null) {
 
-            BookingDAO dao = new BookingDAO();
+            BookingDAO dao = new BookingDAO(); // DAO object
 
+            // Update status in database
             if (dao.updateOrderStatus(orderId, status)) {
 
                 JOptionPane.showMessageDialog(this, "Status Updated");
 
-                dispose();
-                new AdminOrdersFrame();
+                dispose(); // Close current frame
+                new AdminOrdersFrame(); // Reload updated data
             }
         }
     }
 
+    // Main method (program starts here)
     public static void main(String[] args) {
+
         SwingUtilities.invokeLater(AdminOrdersFrame::new);
+        // Run UI safely on Event Dispatch Thread
     }
 }
