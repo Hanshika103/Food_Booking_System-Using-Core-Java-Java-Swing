@@ -88,3 +88,8 @@ The system also includes an admin module to manage food items and ensures that a
 * Provides interactive interface for users and admin
 * Displays menu and order details
 
+### Run Code 
+```
+ java -cp "bin;lib/mysql-connector-j-9.6.0.jar" main.Main
+
+```
